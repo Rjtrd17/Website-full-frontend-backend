@@ -323,5 +323,117 @@
             }, 3000);
         }
     </script>
+
+    <!-- ... all your admin HTML content ... -->
+
+    <!-- ✅ ADD THIS BLOCK before </body> in admin/index.html -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const { createClient } = supabase;
+      const db = createClient(
+        'https://vptidapvhejtviljegcm.supabase.co',      // 👈 same Project URL
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdGlkYXB2aGVqdHZpbGplZ2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzk1ODksImV4cCI6MjA5MDk1NTU4OX0.deTzO4Ys1LCCMRtGRwL3WZTz-3JxKukdpcWuV4CjVKk'          '          // 👈 same anon key
+      );
+
+      // ── AUTH ──────────────────────────────────────────
+      async function adminLogin(email, password) {
+        const { data, error } = await db.auth.signInWithPassword({
+          email, password
+        });
+        if (error) {
+          alert('Login failed: ' + error.message);
+          return false;
+        }
+        showDashboard();
+        loadAdminSettings();
+        return true;
+      }
+
+      async function adminLogout() {
+        await db.auth.signOut();
+        showLoginForm();
+      }
+
+      // Check if already logged in when admin page opens
+      window.addEventListener('load', async () => {
+        const { data: { session } } = await db.auth.getSession();
+        if (session) {
+          showDashboard();
+          loadAdminSettings();
+        } else {
+          showLoginForm();
+        }
+      });
+
+      // ── READ SETTINGS ─────────────────────────────────
+      async function loadAdminSettings() {
+        const { data } = await db.from('settings').select('id, value');
+        if (!data) return;
+        data.forEach(row => {
+          const el = document.getElementById('setting-' + row.id);
+          if (el) el.value = row.value;
+        });
+      }
+
+      // ── WRITE A SETTING ───────────────────────────────
+      async function saveSetting(key) {
+        const el = document.getElementById('setting-' + key);
+        if (!el) return;
+        const { error } = await db.from('settings')
+          .update({ value: el.value, updated_at: new Date() })
+          .eq('id', key);
+        if (error) alert('Save failed: ' + error.message);
+        else showToast('Saved!');
+      }
+
+      // ── UPLOAD FILE (QR code / photo) ─────────────────
+      async function uploadFile(file, bucket, path) {
+        const { data, error } = await db.storage
+          .from(bucket)
+          .upload(path, file, { upsert: true });
+        if (error) { alert('Upload failed: ' + error.message); return null; }
+        const { data: url } = db.storage
+          .from(bucket).getPublicUrl(path);
+        return url.publicUrl;
+      }
+
+      // ── READ DONATIONS ────────────────────────────────
+      async function loadDonations() {
+        const { data } = await db.from('donations')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        return data || [];
+      }
+
+      // ── READ MESSAGES ─────────────────────────────────
+      async function loadMessages() {
+        const { data } = await db.from('messages')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        return data || [];
+      }
+
+      // ── MARK MESSAGE AS READ ──────────────────────────
+      async function markRead(id) {
+        await db.from('messages')
+          .update({ is_read: true })
+          .eq('id', id);
+      }
+
+      function showToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = '✅ ' + msg;
+        t.style.cssText = 'position:fixed;bottom:60px;right:20px;background:#166534;color:#fff;padding:10px 20px;border-radius:6px;font-family:sans-serif;font-size:14px;z-index:9999';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2500);
+      }
+    </script>
+
+  </body>
+</html>
+
+    
 </body>
 </html>
