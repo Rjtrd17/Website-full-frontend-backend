@@ -3332,6 +3332,97 @@
     // Initialize language display
     // CSS classes handle language display
   </script>
+<!-- ... all your existing HTML content ... -->
+
+    <!-- your existing <script> block with go(), toggleLang() etc. -->
+    <script>
+      function go(page){ ... }
+      function toggleLang(){ ... }
+      // ... rest of your existing JS
+    </script>
+
+    <!-- ✅ ADD THIS BLOCK RIGHT HERE — before </body> -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const { createClient } = supabase;
+      const db = createClient(
+        'https://vptidapvhejtviljegcm.supabase.co',      // 👈 paste your Project URL
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdGlkYXB2aGVqdHZpbGplZ2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzk1ODksImV4cCI6MjA5MDk1NTU4OX0.deTzO4Ys1LCCMRtGRwL3WZTz-3JxKukdpcWuV4CjVKk'          // 👈 paste your anon public key
+      );
+
+      // Load live settings when page opens
+      async function loadPublicSettings() {
+        const { data } = await db.from('settings').select('id, value');
+        if (!data) return;
+
+        const s = {};
+        data.forEach(row => s[row.id] = row.value);
+
+        // Update live stream
+        if (s.stream_url) {
+          const frame = document.getElementById('liveVideoFrame');
+          if (frame) frame.innerHTML =
+            `<iframe src="${s.stream_url}" width="100%" height="100%"
+             frameborder="0" allowfullscreen allow="autoplay;encrypted-media"></iframe>`;
+        }
+
+        // Update QR code
+        if (s.qr_code_url) {
+          const qr = document.getElementById('qrCodeImg');
+          if (qr) qr.src = s.qr_code_url;
+        }
+
+        // Update UPI IDs
+        if (s.upi_id_1) {
+          const el = document.getElementById('upi1Text');
+          if (el) el.textContent = s.upi_id_1;
+        }
+        if (s.upi_id_2) {
+          const el = document.getElementById('upi2Text');
+          if (el) el.textContent = s.upi_id_2;
+        }
+
+        // Update contact details
+        if (s.phone) {
+          const el = document.getElementById('contactPhone');
+          if (el) { el.textContent = s.phone; el.href = 'tel:' + s.phone; }
+        }
+        if (s.email) {
+          const el = document.getElementById('contactEmail');
+          if (el) { el.textContent = s.email; el.href = 'mailto:' + s.email; }
+        }
+      }
+
+      // Save contact form message to database
+      async function saveMessage(name, mobile, email, subject, message) {
+        const { error } = await db.from('messages').insert({
+          name, mobile, email, subject, message
+        });
+        if (error) console.error('Message save failed:', error.message);
+      }
+
+      // Save donation record
+      async function saveDonation(donor, mobile, amount, purpose, paymentId) {
+        const receiptNo = 'HMT-' + Date.now();
+        await db.from('donations').insert({
+          donor_name: donor,
+          mobile,
+          amount,
+          purpose,
+          payment_id: paymentId,
+          receipt_no: receiptNo,
+          status: 'completed'
+        });
+        return receiptNo;
+      }
+
+      // Run on page load
+      window.addEventListener('load', loadPublicSettings);
+    </script>
+
+  </body>   <!-- ✅ closing body tag stays at the very end -->
+</html>
+  
 </body>
 
 </html>
