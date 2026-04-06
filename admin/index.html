@@ -1,439 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temple Admin Console</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Sans+Gujarati:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #121212;
-            --bg-panel: #1E1E1E;
-            --text-light: #FBF6ED;
-            --text-muted: #A0A0A0;
-            --accent: #C9972A;
-            --accent-hover: #F0C04A;
-            --border: #333333;
-            --success: #28a745;
-            --danger: #dc3545;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Harsidhdhi Mataji Temple</title>
+<style>
+  :root {
+    --cr: #8B1A1A; --cr-d: #5C0E0E; --gd: #C9972A; --gd-l: #F0C04A;
+    --sf: #D4622A; --cm: #FBF6ED; --wh: #FFFEF9; --tx: #1A0A00;
+    --tx-m: #3D1C00; --tx-s: #7A5533; --bd: rgba(201,151,42,.3);
+    --sh: rgba(90,30,0,.15); --green: #166534; --red: #991B1B;
+  }
+  * { margin:0; padding:0; box-sizing:border-box }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f5f5; color: var(--tx); min-height: 100vh }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--cr-d), var(--cr), #8B4500);
+    padding: 20px;
+  }
+  .login-box {
+    background: var(--wh); border-radius: 10px; padding: 44px 40px;
+    width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .login-logo { text-align: center; margin-bottom: 28px }
+  .login-logo .om { font-size: 48px; display: block; margin-bottom: 8px; filter: drop-shadow(0 2px 8px rgba(201,151,42,.5)) }
+  .login-logo h1 { font-size: 18px; font-weight: 700; color: var(--cr-d); margin-bottom: 3px }
+  .login-logo p { font-size: 12px; color: var(--tx-s); letter-spacing: 1px }
+  .login-box h2 { font-size: 20px; font-weight: 600; color: var(--tx); margin-bottom: 24px; text-align: center }
+  .fg { margin-bottom: 16px }
+  .fg label { display: block; font-size: 12px; color: var(--tx-s); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px }
+  .fg input {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--bd);
+    border-radius: 5px; font-size: 15px; color: var(--tx);
+    background: var(--cm); outline: none; transition: border-color .2s;
+  }
+  .fg input:focus { border-color: var(--gd); background: var(--wh) }
+  .btn-login {
+    width: 100%; padding: 14px; background: linear-gradient(135deg, var(--cr), var(--sf));
+    color: #fff; border: none; border-radius: 5px; font-size: 15px;
+    font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px;
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(139,26,26,.4) }
+  .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none }
+  .login-error {
+    background: #FEF2F2; border: 1px solid #FECACA; border-radius: 5px;
+    padding: 12px 14px; color: var(--red); font-size: 13px; margin-bottom: 16px;
+    display: none;
+  }
+  .login-note { text-align: center; font-size: 12px; color: var(--tx-s); margin-top: 20px }
+  .login-note a { color: var(--cr); text-decoration: none }
 
-        body {
-            font-family: 'Noto Sans Gujarati', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-light);
-            display: flex;
-            min-height: 100vh;
-        }
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; min-height: 100vh }
 
-        .sidebar {
-            width: 250px;
-            background: var(--bg-panel);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
+  /* Top bar */
+  .topbar {
+    background: var(--cr-d); color: var(--gd-l); padding: 0 24px;
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3); position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700 }
+  .topbar-logo span { font-size: 22px }
+  .topbar-right { display: flex; align-items: center; gap: 16px }
+  .admin-badge { background: rgba(201,151,42,.2); border: 1px solid rgba(201,151,42,.4); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: var(--gd-l) }
+  .btn-logout { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); color: var(--gd-l); padding: 7px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s }
+  .btn-logout:hover { background: rgba(255,255,255,.15) }
 
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border);
-            text-align: center;
-        }
+  /* Layout */
+  .layout { display: flex; min-height: calc(100vh - 56px) }
 
-        .sidebar-header h2 {
-            font-family: 'Cinzel Decorative', serif;
-            color: var(--accent);
-            font-size: 16px;
-            letter-spacing: 2px;
-        }
+  /* Sidebar */
+  .sidebar {
+    width: 220px; background: var(--wh); border-right: 1px solid var(--bd);
+    padding: 20px 0; flex-shrink: 0; position: sticky; top: 56px; height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+  .sidebar-section { padding: 0 12px; margin-bottom: 6px }
+  .sidebar-label { font-size: 10px; font-weight: 700; color: var(--tx-s); letter-spacing: 1px; text-transform: uppercase; padding: 10px 12px 4px }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 9px; padding: 9px 12px;
+    border-radius: 5px; cursor: pointer; font-size: 13px; color: var(--tx-m);
+    transition: all .15s; font-weight: 500;
+  }
+  .sidebar-item:hover, .sidebar-item.active { background: rgba(139,26,26,.08); color: var(--cr-d) }
+  .sidebar-item.active { font-weight: 600 }
+  .sidebar-icon { font-size: 16px; width: 20px; text-align: center }
+  .badge-count { background: var(--cr); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: auto }
 
-        .sidebar-nav {
-            flex: 1;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+  /* Content */
+  .content { flex: 1; padding: 28px; overflow-y: auto }
+  .panel { display: none }
+  .panel.active { display: block }
 
-        .nav-link {
-            padding: 12px 24px;
-            color: var(--text-light);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
+  /* Cards */
+  .panel-title { font-size: 22px; font-weight: 700; color: var(--tx); margin-bottom: 6px }
+  .panel-sub { font-size: 13px; color: var(--tx-s); margin-bottom: 24px }
+  .card { background: var(--wh); border: 1px solid var(--bd); border-radius: 8px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px var(--sh) }
+  .card h3 { font-size: 15px; font-weight: 700; color: var(--tx); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--bd) }
+  .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
 
-        .nav-link:hover, .nav-link.active {
-            background: rgba(201, 151, 42, 0.1);
-            color: var(--accent);
-            border-left-color: var(--accent);
-        }
+  /* Form elements */
+  .fg2 { margin-bottom: 14px }
+  .fg2 label { display: block; font-size: 11px; color: var(--tx-s); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px }
+  .fg2 input, .fg2 textarea, .fg2 select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--bd);
+    border-radius: 4px; font-size: 13px; color: var(--tx);
+    background: var(--cm); outline: none; transition: border-color .2s; font-family: inherit;
+  }
+  .fg2 input:focus, .fg2 textarea:focus { border-color: var(--gd); background: var(--wh) }
+  .fg2 textarea { resize: vertical; min-height: 80px }
+  .fg2 small { font-size: 11px; color: var(--tx-s); margin-top: 4px; display: block }
 
-        .main-content {
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
-        }
+  .btn-save {
+    background: linear-gradient(135deg, var(--cr), var(--sf)); color: #fff;
+    border: none; border-radius: 4px; padding: 10px 22px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .btn-save:hover { transform: translateY(-1px); box-shadow: 0 3px 12px var(--sh) }
+  .btn-secondary { background: var(--cm); border: 1px solid var(--bd); color: var(--tx-m); border-radius: 4px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s }
+  .btn-secondary:hover { border-color: var(--gd) }
+  .btn-danger { background: #FEF2F2; border: 1px solid #FECACA; color: var(--red); border-radius: 4px; padding: 8px 16px; font-size: 12px; font-weight: 600; cursor: pointer }
 
-        .header {
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px }
+  .stat-card { background: var(--wh); border: 1px solid var(--bd); border-radius: 6px; padding: 18px; text-align: center }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: var(--cr); display: block; margin-bottom: 4px }
+  .stat-card .lbl { font-size: 11px; color: var(--tx-s); text-transform: uppercase; letter-spacing: .5px }
 
-        .header-title {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 24px;
-            color: var(--accent);
-        }
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px }
+  .data-table th { background: var(--cm); padding: 10px 12px; text-align: left; font-size: 11px; color: var(--tx-s); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--bd) }
+  .data-table td { padding: 11px 12px; border-bottom: 1px solid rgba(201,151,42,.1); color: var(--tx-m) }
+  .data-table tr:hover td { background: rgba(201,151,42,.04) }
+  .status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600 }
+  .status-completed { background: #DCFCE7; color: #166534 }
+  .status-pending { background: #FEF9C3; color: #713F12 }
+  .status-unread { background: #FEF2F2; color: #991B1B }
 
-        .logout-btn {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+  /* QR Upload */
+  .qr-upload-area {
+    border: 2px dashed var(--bd); border-radius: 6px; padding: 24px;
+    text-align: center; cursor: pointer; transition: all .2s; background: var(--cm);
+  }
+  .qr-upload-area:hover { border-color: var(--gd); background: rgba(201,151,42,.05) }
+  .qr-preview { width: 160px; height: 160px; border: 2px solid var(--gd); border-radius: 4px; object-fit: contain; display: block; margin: 0 auto 12px }
+  .qr-placeholder { width: 160px; height: 160px; border: 2px dashed var(--bd); border-radius: 4px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 40px; color: var(--tx-s); background: var(--wh) }
 
-        .logout-btn:hover { background: var(--danger); color: white; }
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: var(--green); color: #fff; padding: 12px 20px;
+    border-radius: 6px; font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,.3); transform: translateY(80px);
+    transition: transform .3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0) }
+  .toast.error { background: var(--red) }
 
-        .panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
-            display: none;
-        }
+  /* Password change */
+  .security-note { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 5px; padding: 12px 14px; font-size: 13px; color: #92400E; margin-bottom: 16px }
 
-        .panel.active { display: block; }
+  /* Connection indicator */
+  .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; display: inline-block; margin-right: 6px; animation: pulse-conn 2s infinite }
+  @keyframes pulse-conn { 0%,100%{opacity:1} 50%{opacity:.5} }
 
-        .panel-heading {
-            font-size: 18px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            color: var(--accent);
-        }
+  /* Receipt preview */
+  .receipt-preview {
+    background: var(--wh); border: 2px solid var(--bd); border-radius: 6px;
+    padding: 24px; font-family: 'Courier New', monospace; font-size: 13px;
+    line-height: 1.8; max-width: 400px;
+  }
+  .receipt-preview h2 { font-family: sans-serif; font-size: 16px; text-align: center; color: var(--cr-d); margin-bottom: 4px }
+  .receipt-preview .r-divider { border: none; border-top: 1px dashed var(--bd); margin: 10px 0 }
+  .receipt-row { display: flex; justify-content: space-between }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+  /* Gallery grid */
+  .gallery-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px }
+  .gallery-item { position: relative; border-radius: 5px; overflow: hidden; border: 1px solid var(--bd) }
+  .gallery-item img { width: 100%; height: 120px; object-fit: cover; display: block }
+  .gallery-item-del { position: absolute; top: 4px; right: 4px; background: rgba(153,27,27,.85); color: #fff; border: none; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center }
 
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px }
+  @keyframes spin { to { transform: rotate(360deg) } }
 
-        .form-control {
-            width: 100%;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            padding: 12px;
-            border-radius: 4px;
-            font-family: inherit;
-        }
+  /* Change password */
+  .pw-form { max-width: 400px }
 
-        .form-control:focus { outline: none; border-color: var(--accent); }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #1A0A00;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary:hover { background: var(--accent-hover); }
-
-        /* Login Overlay */
-        #login-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-dark);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-box {
-            background: var(--bg-panel);
-            padding: 40px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-
-        .login-box h1 { margin-bottom: 24px; color: var(--accent); font-family: 'Cinzel Decorative', serif; }
-        
-        .alert {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .alert.success { background: rgba(40, 167, 69, 0.2); color: var(--success); border: 1px solid var(--success); display: block; }
-        .alert.error { background: rgba(220, 53, 69, 0.2); color: var(--danger); border: 1px solid var(--danger); display: block; }
-
-    </style>
+  @media(max-width:768px) {
+    .sidebar { display: none }
+    .stats-row { grid-template-columns: 1fr 1fr }
+    .card-row { grid-template-columns: 1fr }
+    .gallery-grid { grid-template-columns: repeat(2,1fr) }
+  }
+</style>
 </head>
 <body>
 
-    <!-- Login screen -->
-    <div id="login-overlay">
-        <div class="login-box">
-            <h1>Temple Admin</h1>
-            <div id="loginAlert" class="alert error" style="display: none;"></div>
-            <div class="form-group">
-                <input type="password" id="adminPassword" class="form-control" placeholder="Enter Admin Password">
-            </div>
-            <button class="btn-primary" style="width: 100%;" onclick="attemptLogin()">Login</button>
-            <p style="margin-top: 20px; font-size: 12px; color: var(--text-muted);">Use your admin secure password</p>
-        </div>
+<!-- ══════════ LOGIN SCREEN ══════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="om">🕉</span>
+      <h1>Harsidhdhi Mataji Temple</h1>
+      <p>ADMIN PANEL · KOYALA DUNGAR</p>
     </div>
+    <h2>Admin Login</h2>
+    <div class="login-error" id="loginError"></div>
+    <div class="fg">
+      <label>Admin Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@yourtemple.org" autocomplete="email">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Login to Admin Panel</button>
+    <p class="login-note">
+      Forgot password? Reset at <a href="https://supabase.com" target="_blank">Supabase Dashboard</a><br>
+      <span style="color:#ef4444;font-weight:600">⚠️ Never share admin credentials with anyone</span>
+    </p>
+  </div>
+</div>
 
-    <!-- Main Console -->
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <span>🕉</span>
+      Harsidhdhi Mataji — Admin
+    </div>
+    <div class="topbar-right">
+      <span><span class="conn-dot"></span><span style="font-size:12px;color:var(--gd-l)" id="connStatus">Connected</span></span>
+      <span class="admin-badge" id="adminEmail">admin</span>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>Harsidhdhi Admin</h2>
-        </div>
-        <div class="sidebar-nav">
-            <a class="nav-link active" onclick="switchPanel('dashboard', this)">Dashboard</a>
-            <a class="nav-link" onclick="switchPanel('livestream', this)">Livestream URLs</a>
-            <a class="nav-link" onclick="switchPanel('payments', this)">Payment Gateways</a>
-            <a class="nav-link" onclick="switchPanel('gallery', this)">Gallery Management</a>
-        </div>
-        <div style="padding: 24px; margin-top: auto;">
-            <a href="harsidhdhi-mataji-temple-website.html" style="color: var(--accent); font-size: 13px; text-decoration: none;">&larr; Back to Public Website</a>
-        </div>
+      <div class="sidebar-label">Main</div>
+      <div class="sidebar-item active" onclick="showPanel('overview')"><span class="sidebar-icon">📊</span> Overview</div>
+      <div class="sidebar-label">Temple Settings</div>
+      <div class="sidebar-item" onclick="showPanel('live-darshan')"><span class="sidebar-icon">📺</span> Live Darshan</div>
+      <div class="sidebar-item" onclick="showPanel('donation-settings')"><span class="sidebar-icon">💳</span> Donation / UPI</div>
+      <div class="sidebar-item" onclick="showPanel('contact-settings')"><span class="sidebar-icon">📞</span> Contact Info</div>
+      <div class="sidebar-item" onclick="showPanel('gallery')"><span class="sidebar-icon">🖼️</span> Photo Gallery</div>
+      <div class="sidebar-label">Records</div>
+      <div class="sidebar-item" onclick="showPanel('donations-list')"><span class="sidebar-icon">💰</span> Donations <span class="badge-count" id="donationCount">0</span></div>
+      <div class="sidebar-item" onclick="showPanel('messages')"><span class="sidebar-icon">📩</span> Messages <span class="badge-count" id="msgCount">0</span></div>
+      <div class="sidebar-label">Advanced</div>
+      <div class="sidebar-item" onclick="showPanel('receipt-settings')"><span class="sidebar-icon">🧾</span> Receipt / GST</div>
+      <div class="sidebar-item" onclick="showPanel('payment-settings')"><span class="sidebar-icon">⚙️</span> Payment Keys</div>
+      <div class="sidebar-item" onclick="showPanel('security')"><span class="sidebar-icon">🔒</span> Security</div>
     </div>
 
-    <div class="main-content">
-        <div class="header">
-            <div class="header-title" id="pageTitle">Admin Dashboard</div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-        
-        <div id="settingsAlert" class="alert"></div>
+    <!-- Content -->
+    <div class="content">
 
-        <!-- Dashboard Panel -->
-        <div id="panel-dashboard" class="panel active">
-            <h3 class="panel-heading">System Overview</h3>
-            <p style="color: var(--text-muted);">Welcome to the newly separated admin console. From here, you can manage the contents of the public live website without modifying the source code.</p>
-            <br>
-            <p style="color: var(--text-muted);">Note: For a fully persistent backend, refer to the POSTGRESQL_SETUP_GUIDE.md and PAYMENT_SETUP_GUIDE.md.</p>
+      <!-- OVERVIEW -->
+      <div class="panel active" id="panel-overview">
+        <div class="panel-title">Welcome back 🙏</div>
+        <div class="panel-sub">Here's your temple dashboard at a glance</div>
+        <div class="stats-row">
+          <div class="stat-card"><span class="num" id="stat-donations">—</span><span class="lbl">Total Donations</span></div>
+          <div class="stat-card"><span class="num" id="stat-amount">—</span><span class="lbl">Amount Collected</span></div>
+          <div class="stat-card"><span class="num" id="stat-messages">—</span><span class="lbl">Messages</span></div>
+          <div class="stat-card"><span class="num" id="stat-unread">—</span><span class="lbl">Unread Messages</span></div>
         </div>
-
-        <!-- Livestream Panel -->
-        <div id="panel-livestream" class="panel">
-            <h3 class="panel-heading">Manage Live Darshan</h3>
-            <div class="form-group">
-                <label class="form-label">YouTube Livestream Embed URL</label>
-                <input type="text" id="streamUrl" class="form-control" placeholder="e.g. https://www.youtube.com/embed/LIVE_ID">
-            </div>
-            <button class="btn-primary" onclick="saveSettings('Livestream URL updated successfully')">Save Livestream</button>
+        <div class="card">
+          <h3>🔍 Supabase Connection Test</h3>
+          <p style="font-size:13px;color:var(--tx-m);margin-bottom:16px">Click each button to verify your database is working correctly.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-secondary" onclick="testRead()">Test Read</button>
+            <button class="btn-secondary" onclick="testWrite()">Test Write</button>
+            <button class="btn-secondary" onclick="testAuth()">Test Auth</button>
+            <button class="btn-secondary" onclick="testStorage()">Test Storage</button>
+          </div>
+          <div id="test-output" style="margin-top:14px;font-size:12px;font-family:monospace;background:#1e1e1e;color:#4ade80;padding:14px;border-radius:4px;min-height:60px;white-space:pre-wrap">Test results will appear here...</div>
         </div>
-
-        <!-- Payments Panel -->
-        <div id="panel-payments" class="panel">
-            <h3 class="panel-heading">Payment Configurations (Razorpay/UPI)</h3>
-            <div class="form-group">
-                <label class="form-label">Razorpay Key ID</label>
-                <input type="text" id="rzpKey" class="form-control" placeholder="rzp_live_xxxxxxxx">
-            </div>
-            <div class="form-group">
-                <label class="form-label">UPI VPA</label>
-                <input type="text" id="upiVpa" class="form-control" placeholder="templetrust@upi">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Success Email Forwarding</label>
-                <input type="email" id="emailFwd" class="form-control" placeholder="admin@temple.com">
-            </div>
-            <button class="btn-primary" onclick="saveSettings('Payment gateways configured successfully')">Save Payment Settings</button>
+        <div class="card">
+          <h3>⚡ Quick Actions</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-save" onclick="showPanel('live-darshan')">Update Live Stream</button>
+            <button class="btn-secondary" onclick="showPanel('donation-settings')">Update QR Code</button>
+            <button class="btn-secondary" onclick="showPanel('messages')">Read Messages</button>
+          </div>
         </div>
+      </div>
 
-        <!-- Gallery Panel -->
-        <div id="panel-gallery" class="panel">
-            <h3 class="panel-heading">Gallery Management</h3>
-            <div class="form-group">
-                <label class="form-label">Upload New Photo (URL or Path)</label>
-                <input type="text" id="imgUrl" class="form-control" placeholder="C:\path\to\image.jpg or https://...">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Image Title</label>
-                <input type="text" id="imgTitle" class="form-control" placeholder="e.g. Morning Aarti">
-            </div>
-            <button class="btn-primary" onclick="saveSettings('Gallery image published')">Publish to Gallery</button>
+      <!-- LIVE DARSHAN -->
+      <div class="panel" id="panel-live-darshan">
+        <div class="panel-title">📺 Live Darshan Settings</div>
+        <div class="panel-sub">Update the YouTube or live stream link that appears on the public website</div>
+        <div class="card">
+          <h3>Stream Link</h3>
+          <div class="fg2">
+            <label>YouTube Embed URL / Live Stream URL</label>
+            <input type="text" id="setting-stream_url" placeholder="https://www.youtube.com/embed/VIDEO_ID_HERE">
+            <small>How to get YouTube embed URL: Open video → Share → Embed → copy the src URL only (starts with https://www.youtube.com/embed/...)</small>
+          </div>
+          <div class="fg2">
+            <label>Live Stream Status Message</label>
+            <input type="text" id="setting-stream_status" placeholder="e.g. Live Darshan daily at 6 AM and 8 PM">
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['stream_url','stream_status'])">💾 Save Stream Settings</button>
         </div>
+        <div class="card">
+          <h3>Darshan Schedule</h3>
+          <div class="card-row">
+            <div class="fg2">
+              <label>Morning Darshan Time</label>
+              <input type="text" id="setting-morning_time" placeholder="6:00 AM – 12:00 PM">
+            </div>
+            <div class="fg2">
+              <label>Evening Darshan Time</label>
+              <input type="text" id="setting-evening_time" placeholder="4:00 PM – 6:00 PM">
+            </div>
+          </div>
+          <div class="fg2">
+            <label>Special Darshan Notice</label>
+            <textarea id="setting-darshan_notice" placeholder="e.g. Navratri Live Darshan starts Oct 2nd at 6 AM. All 9 nights will be streamed live."></textarea>
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['morning_time','evening_time','darshan_notice'])">💾 Save Schedule</button>
+        </div>
+      </div>
 
+      <!-- DONATION SETTINGS -->
+      <div class="panel" id="panel-donation-settings">
+        <div class="panel-title">💳 Donation & UPI Settings</div>
+        <div class="panel-sub">Update QR code, UPI IDs, and bank transfer details</div>
+        <div class="card">
+          <h3>UPI QR Code Upload</h3>
+          <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <div class="qr-upload-area" onclick="document.getElementById('qrFileInput').click()">
+                <img id="qr-preview-img" class="qr-preview" src="" alt="" style="display:none">
+                <div id="qr-preview-placeholder" class="qr-placeholder">🔲</div>
+                <p style="font-size:13px;color:var(--tx-s);margin-top:8px">Click to upload QR code image</p>
+                <p style="font-size:11px;color:var(--tx-s)">PNG or JPG • Max 2 MB</p>
+              </div>
+              <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="uploadQR(this)">
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div class="fg2" style="margin-top:0">
+                <label>Current QR Code URL (auto-filled after upload)</label>
+                <input type="text" id="setting-qr_code_url" placeholder="Will be filled automatically after upload">
+              </div>
+              <button class="btn-save" onclick="saveSetting('qr_code_url')">💾 Save QR URL</button>
+              <p style="font-size:12px;color:var(--tx-s);margin-top:10px">⚠️ This QR code appears on the public Donate page. Update it whenever you change your UPI account.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>UPI IDs</h3>
+          <div class="card-row">
+            <div class="fg2">
+              <label>Primary UPI ID</label>
+              <input type="text" id="setting-upi_id_1" placeholder="templetrustname@upi">
+            </div>
+            <div class="fg2">
+              <label>Secondary UPI ID</label>
+              <input type="text" id="setting-upi_id_2" placeholder="harsidhdhi@paytm">
+            </div>
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['upi_id_1','upi_id_2'])">💾 Save UPI IDs</button>
+        </div>
+        <div class="card">
+          <h3>Bank Transfer Details</h3>
+          <div class="card-row">
+            <div class="fg2">
+              <label>Bank Name</label>
+              <input type="text" id="setting-bank_name" placeholder="e.g. State Bank of India">
+            </div>
+            <div class="fg2">
+              <label>Account Number</label>
+              <input type="text" id="setting-bank_account" placeholder="XXXXXXXXXX">
+            </div>
+          </div>
+          <div class="card-row">
+            <div class="fg2">
+              <label>IFSC Code</label>
+              <input type="text" id="setting-bank_ifsc" placeholder="SBIN0XXXXXX">
+            </div>
+            <div class="fg2">
+              <label>Account Holder Name</label>
+              <input type="text" id="setting-bank_holder" placeholder="Shri Harsidhdhi Mataji Temple Trust">
+            </div>
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['bank_name','bank_account','bank_ifsc','bank_holder'])">💾 Save Bank Details</button>
+        </div>
+      </div>
+
+      <!-- CONTACT SETTINGS -->
+      <div class="panel" id="panel-contact-settings">
+        <div class="panel-title">📞 Contact Information</div>
+        <div class="panel-sub">Update temple contact details shown on the public website</div>
+        <div class="card">
+          <div class="card-row">
+            <div class="fg2">
+              <label>Phone Number</label>
+              <input type="text" id="setting-phone" placeholder="+91 XXXXX XXXXX">
+            </div>
+            <div class="fg2">
+              <label>Email Address</label>
+              <input type="email" id="setting-email" placeholder="info@harsidhdhi.org">
+            </div>
+          </div>
+          <div class="card-row">
+            <div class="fg2">
+              <label>WhatsApp Number</label>
+              <input type="text" id="setting-whatsapp" placeholder="+91 XXXXX XXXXX">
+            </div>
+            <div class="fg2">
+              <label>Facebook Page URL</label>
+              <input type="text" id="setting-facebook_url" placeholder="https://facebook.com/...">
+            </div>
+          </div>
+          <div class="fg2">
+            <label>YouTube Channel URL</label>
+            <input type="text" id="setting-youtube_url" placeholder="https://youtube.com/...">
+          </div>
+          <div class="fg2">
+            <label>Address (as shown on website)</label>
+            <textarea id="setting-address" placeholder="Koyala Dungar, Harshad, Porbandar, Gujarat – 360 579"></textarea>
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['phone','email','whatsapp','facebook_url','youtube_url','address'])">💾 Save Contact Info</button>
+        </div>
+      </div>
+
+      <!-- GALLERY -->
+      <div class="panel" id="panel-gallery">
+        <div class="panel-title">🖼️ Photo Gallery</div>
+        <div class="panel-sub">Upload and manage temple photos shown on the public website</div>
+        <div class="card">
+          <h3>Upload New Photos</h3>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div class="fg2" style="margin:0;flex:1;min-width:200px">
+              <label>Photo Caption (Gujarati)</label>
+              <input type="text" id="gallery-title-gu" placeholder="ઉ ઉ ઉ ઉ ઉ ઉ ઉ ઉ">
+            </div>
+            <div class="fg2" style="margin:0;flex:1;min-width:200px">
+              <label>Photo Caption (English)</label>
+              <input type="text" id="gallery-title-en" placeholder="e.g. Main Temple View">
+            </div>
+            <div class="fg2" style="margin:0">
+              <label>Category</label>
+              <select id="gallery-category">
+                <option value="temple">Temple</option>
+                <option value="darshan">Darshan</option>
+                <option value="navratri">Navratri</option>
+                <option value="nature">Nature / Beach</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <input type="file" id="galleryFileInput" accept="image/*" multiple style="display:none" onchange="uploadGalleryPhotos(this)">
+            <button class="btn-save" onclick="document.getElementById('galleryFileInput').click()">📸 Choose Photos to Upload</button>
+            <span style="font-size:12px;color:var(--tx-s);margin-left:12px">Max 5 MB per photo • PNG or JPG</span>
+          </div>
+          <div id="gallery-upload-progress" style="margin-top:10px;font-size:12px;color:var(--tx-s)"></div>
+        </div>
+        <div class="card">
+          <h3>Existing Photos</h3>
+          <div class="gallery-grid" id="gallery-grid">
+            <div style="font-size:13px;color:var(--tx-s);grid-column:span 4">Loading photos...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DONATIONS LIST -->
+      <div class="panel" id="panel-donations-list">
+        <div class="panel-title">💰 Donation Records</div>
+        <div class="panel-sub">All donations received through the website</div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:14px;font-weight:600">Recent Donations</span>
+            <button class="btn-secondary" onclick="loadDonations()">Refresh</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Receipt No</th>
+                  <th>Donor Name</th>
+                  <th>Mobile</th>
+                  <th>Amount</th>
+                  <th>Purpose</th>
+                  <th>Mode</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="donations-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--tx-s);padding:20px">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="panel" id="panel-messages">
+        <div class="panel-title">📩 Contact Messages</div>
+        <div class="panel-sub">Messages sent through the contact form on the public website</div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:14px;font-weight:600">All Messages</span>
+            <button class="btn-secondary" onclick="loadMessages()">Refresh</button>
+          </div>
+          <div id="messages-list" style="padding:16px">
+            <div style="font-size:13px;color:var(--tx-s)">Loading messages...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECEIPT SETTINGS -->
+      <div class="panel" id="panel-receipt-settings">
+        <div class="panel-title">🧾 Donation Receipt Settings</div>
+        <div class="panel-sub">Customise the receipt sent to donors after payment</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+          <div>
+            <div class="card">
+              <h3>Receipt Details</h3>
+              <div class="fg2">
+                <label>Trust Name (on receipt)</label>
+                <input type="text" id="setting-trust_name" placeholder="Shri Harsidhdhi Mataji Temple Trust">
+              </div>
+              <div class="fg2">
+                <label>Trust Registration Number</label>
+                <input type="text" id="setting-trust_reg" placeholder="e.g. REG/GUJ/2020/XXXXX">
+              </div>
+              <div class="fg2">
+                <label>GST Number (leave blank if exempt)</label>
+                <input type="text" id="setting-gst_number" placeholder="e.g. 24XXXXXXXXX or leave blank">
+              </div>
+              <div class="fg2">
+                <label>80G Certificate Number</label>
+                <input type="text" id="setting-80g_number" placeholder="e.g. 80G/2020/XXXXXXX">
+              </div>
+              <div class="fg2">
+                <label>Receipt Footer Message</label>
+                <textarea id="setting-receipt_footer" placeholder="e.g. This receipt is valid for 80G tax exemption. Jai Harsidhdhi Mataji!"></textarea>
+              </div>
+              <button class="btn-save" onclick="saveMultiple(['trust_name','trust_reg','gst_number','80g_number','receipt_footer'])">💾 Save Receipt Settings</button>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>Receipt Preview</h3>
+              <div class="receipt-preview">
+                <h2>🕉 Donation Receipt</h2>
+                <div class="r-divider"></div>
+                <div id="rp-trust" style="text-align:center;font-weight:bold;font-size:14px">Shri Harsidhdhi Mataji Temple Trust</div>
+                <div style="text-align:center;font-size:11px">Koyala Dungar, Harshad, Porbandar, Gujarat</div>
+                <div class="r-divider"></div>
+                <div class="receipt-row"><span>Receipt No:</span><span>HMT-123456</span></div>
+                <div class="receipt-row"><span>Date:</span><span id="rp-date">01/01/2025</span></div>
+                <div class="receipt-row"><span>Donor:</span><span>Devotee Name</span></div>
+                <div class="receipt-row"><span>Mobile:</span><span>+91 XXXXX XXXXX</span></div>
+                <div class="receipt-row"><span>Purpose:</span><span>Temple Development</span></div>
+                <div class="r-divider"></div>
+                <div class="receipt-row" style="font-weight:bold"><span>Amount:</span><span>₹501.00</span></div>
+                <div class="receipt-row" id="rp-gst" style="display:none"><span>GST (<span id="rp-gst-no">-</span>):</span><span>₹0.00</span></div>
+                <div class="r-divider"></div>
+                <div style="text-align:center;font-size:11px" id="rp-footer">Jai Harsidhdhi Mataji! 80G tax exempt.</div>
+                <div style="text-align:center;font-size:10px;margin-top:6px" id="rp-80g">80G Cert: —</div>
+              </div>
+              <button class="btn-secondary" style="margin-top:12px" onclick="updateReceiptPreview()">Refresh Preview</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT KEYS -->
+      <div class="panel" id="panel-payment-settings">
+        <div class="panel-title">⚙️ Payment Gateway Settings</div>
+        <div class="panel-sub">Configure Razorpay for online payments</div>
+        <div class="card">
+          <h3>Razorpay Configuration</h3>
+          <div class="security-note">🔐 These keys are stored in your Supabase database and are only readable by logged-in admin users. Never share your Secret Key.</div>
+          <div class="fg2">
+            <label>Razorpay Key ID (Public)</label>
+            <input type="text" id="setting-rzp_key" placeholder="rzp_live_XXXXXXXXXXXXXXXX">
+            <small>Get this from: Razorpay Dashboard → Settings → API Keys → Key ID</small>
+          </div>
+          <div class="fg2">
+            <label>Razorpay Business Name (shown to payer)</label>
+            <input type="text" id="setting-rzp_name" placeholder="Shri Harsidhdhi Mataji Temple Trust">
+          </div>
+          <div class="fg2">
+            <label>Razorpay Description</label>
+            <input type="text" id="setting-rzp_desc" placeholder="Temple Donation">
+          </div>
+          <button class="btn-save" onclick="saveMultiple(['rzp_key','rzp_name','rzp_desc'])">💾 Save Payment Settings</button>
+        </div>
+        <div class="card">
+          <h3>Test Payment Connection</h3>
+          <button class="btn-secondary" onclick="testRazorpay()">Test Razorpay Key</button>
+          <div id="rzp-test-result" style="margin-top:12px;font-size:13px"></div>
+        </div>
+      </div>
+
+      <!-- SECURITY -->
+      <div class="panel" id="panel-security">
+        <div class="panel-title">🔒 Security Settings</div>
+        <div class="panel-sub">Change admin password and manage account security</div>
+        <div class="card pw-form">
+          <h3>Change Admin Password</h3>
+          <div class="security-note">⚠️ Choose a strong password of at least 12 characters. After changing, you will need to log in again.</div>
+          <div class="fg2">
+            <label>New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password (min 12 chars)">
+          </div>
+          <div class="fg2">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirm-password" placeholder="Re-enter new password">
+          </div>
+          <button class="btn-save" onclick="changePassword()">🔒 Update Password</button>
+        </div>
+        <div class="card">
+          <h3>Current Session Info</h3>
+          <div style="font-size:13px;line-height:2;color:var(--tx-m)" id="session-info">Loading...</div>
+        </div>
+        <div class="card">
+          <h3>Danger Zone</h3>
+          <p style="font-size:13px;color:var(--tx-m);margin-bottom:14px">Sign out of all active sessions across all devices.</p>
+          <button class="btn-danger" onclick="if(confirm('Sign out of all sessions?')) db.auth.signOut().then(() => window.location.reload())">Sign Out All Sessions</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /dashboard -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════════════════════
+// 🔧 CONFIGURATION — Paste YOUR values here
+// ══════════════════════════════════════════════
+const SUPABASE_URL  = 'https://vptidapvhejtviljegcm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdGlkYXB2aGVqdHZpbGplZ2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzk1ODksImV4cCI6MjA5MDk1NTU4OX0.deTzO4Ys1LCCMRtGRwL3WZTz-3JxKukdpcWuV4CjVKk';
+// ══════════════════════════════════════════════
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── UI HELPERS ──────────────────────────────
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.currentTarget && event.currentTarget.classList.add('active');
+  if (name === 'donations-list') loadDonations();
+  if (name === 'messages') loadMessages();
+  if (name === 'gallery') loadGallery();
+  if (name === 'receipt-settings') updateReceiptPreview();
+  if (name === 'security') loadSessionInfo();
+}
+
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOverviewStats();
+}
+
+function showLoginForm() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = (isError ? '❌ ' : '✅ ') + msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── AUTH ────────────────────────────────────
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn      = document.getElementById('loginBtn');
+  const errBox   = document.getElementById('loginError');
+
+  if (!email || !password) {
+    errBox.textContent = 'Please enter email and password.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Logging in...';
+  errBox.style.display = 'none';
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errBox.textContent = '❌ ' + error.message;
+    errBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Login to Admin Panel';
+    return;
+  }
+
+  document.getElementById('adminEmail').textContent = data.user.email;
+  showDashboard();
+  loadAdminSettings();
+}
+
+// Allow pressing Enter to submit login
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogout() {
+  await db.auth.signOut();
+  showLoginForm();
+  showToast('Logged out successfully');
+}
+
+// Check existing session on page load
+window.addEventListener('load', async () => {
+  if (SUPABASE_URL.includes('vptidapvhejtviljegcm')) {
+    document.getElementById('test-output').textContent =
+      '⚠️  SETUP NEEDED: Replace SUPABASE_URL and SUPABASE_ANON at top of admin HTML file.';
+    return;
+  }
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    document.getElementById('adminEmail').textContent = session.user.email;
+    showDashboard();
+    loadAdminSettings();
+  }
+  document.getElementById('rp-date').textContent = new Date().toLocaleDateString('en-IN');
+});
+
+// ── SETTINGS ────────────────────────────────
+async function loadAdminSettings() {
+  const { data, error } = await db.from('settings').select('id, value');
+  if (error) { showToast('Failed to load settings: ' + error.message, true); return; }
+  data.forEach(row => {
+    const el = document.getElementById('setting-' + row.id);
+    if (el) el.value = row.value || '';
+  });
+}
+
+async function saveSetting(key) {
+  const el = document.getElementById('setting-' + key);
+  if (!el) return;
+  const { error } = await db.from('settings')
+    .update({ value: el.value, updated_at: new Date() })
+    .eq('id', key);
+  if (error) showToast('Save failed: ' + error.message, true);
+  else showToast(key + ' saved!');
+}
+
+async function saveMultiple(keys) {
+  for (const key of keys) {
+    const el = document.getElementById('setting-' + key);
+    if (!el) continue;
+    const { error } = await db.from('settings')
+      .update({ value: el.value, updated_at: new Date() })
+      .eq('id', key);
+    if (error) { showToast('Failed to save ' + key + ': ' + error.message, true); return; }
+  }
+  showToast('All settings saved successfully!');
+}
+
+// ── FILE UPLOAD ─────────────────────────────
+async function uploadQR(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('File too large (max 2 MB)', true); return; }
+
+  const path = 'qr-code/upi-qr.' + file.name.split('.').pop();
+  const { error } = await db.storage.from('temple-media').upload(path, file, { upsert: true });
+  if (error) { showToast('Upload failed: ' + error.message, true); return; }
+
+  const { data: urlData } = db.storage.from('temple-media').getPublicUrl(path);
+  const url = urlData.publicUrl;
+
+  document.getElementById('setting-qr_code_url').value = url;
+  const preview = document.getElementById('qr-preview-img');
+  preview.src = url;
+  preview.style.display = 'block';
+  document.getElementById('qr-preview-placeholder').style.display = 'none';
+
+  await db.from('settings').update({ value: url, updated_at: new Date() }).eq('id', 'qr_code_url');
+  showToast('QR code uploaded and saved!');
+}
+
+async function uploadGalleryPhotos(input) {
+  const files = Array.from(input.files);
+  const progress = document.getElementById('gallery-upload-progress');
+  const titleGu  = document.getElementById('gallery-title-gu').value;
+  const titleEn  = document.getElementById('gallery-title-en').value;
+  const category = document.getElementById('gallery-category').value;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    progress.textContent = `Uploading ${i+1}/${files.length}: ${file.name}...`;
+    const path = `gallery/${Date.now()}-${file.name}`;
+    const { error } = await db.storage.from('temple-media').upload(path, file, { upsert: false });
+    if (error) { showToast('Upload failed: ' + error.message, true); continue; }
+
+    const { data: urlData } = db.storage.from('temple-media').getPublicUrl(path);
+    await db.from('gallery').insert({
+      title_gu: titleGu, title_en: titleEn,
+      image_url: urlData.publicUrl, category
+    });
+  }
+  progress.textContent = `✅ Uploaded ${files.length} photo(s) successfully!`;
+  loadGallery();
+  showToast('Photos uploaded!');
+}
+
+// ── GALLERY ─────────────────────────────────
+async function loadGallery() {
+  const { data } = await db.from('gallery').select('*').order('created_at', { ascending: false });
+  const grid = document.getElementById('gallery-grid');
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 4;font-size:13px;color:var(--tx-s)">No photos uploaded yet.</div>';
+    return;
+  }
+  grid.innerHTML = data.map(p => `
+    <div class="gallery-item">
+      <img src="${p.image_url}" alt="${p.title_en || ''}">
+      <button class="gallery-item-del" onclick="deletePhoto('${p.id}')" title="Delete">✕</button>
+      <div style="padding:6px 8px;font-size:11px;color:var(--tx-s)">${p.title_en || p.title_gu || 'Untitled'}</div>
     </div>
+  `).join('');
+}
 
-    <script>
-        function attemptLogin() {
-            const pwd = document.getElementById('adminPassword').value;
-            if(pwd === 'admin123') {
-                document.getElementById('login-overlay').style.display = 'none';
-            } else {
-                const alertBox = document.getElementById('loginAlert');
-                alertBox.textContent = 'Invalid credentials';
-                alertBox.style.display = 'block';
-            }
-        }
+async function deletePhoto(id) {
+  if (!confirm('Delete this photo?')) return;
+  await db.from('gallery').delete().eq('id', id);
+  loadGallery();
+  showToast('Photo deleted');
+}
 
-        function logout() {
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('login-overlay').style.display = 'flex';
-        }
+// ── OVERVIEW STATS ───────────────────────────
+async function loadOverviewStats() {
+  const [{ count: donCount }, { data: donData }, { count: msgCount }, { count: unreadCount }] = await Promise.all([
+    db.from('donations').select('*', { count: 'exact', head: true }),
+    db.from('donations').select('amount').eq('status', 'completed'),
+    db.from('messages').select('*', { count: 'exact', head: true }),
+    db.from('messages').select('*', { count: 'exact', head: true }).eq('is_read', false)
+  ]);
+  const totalAmount = donData ? donData.reduce((s, r) => s + (r.amount || 0), 0) : 0;
+  document.getElementById('stat-donations').textContent = donCount || 0;
+  document.getElementById('stat-amount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
+  document.getElementById('stat-messages').textContent = msgCount || 0;
+  document.getElementById('stat-unread').textContent = unreadCount || 0;
+  document.getElementById('donationCount').textContent = donCount || 0;
+  document.getElementById('msgCount').textContent = unreadCount || 0;
+}
 
-        function switchPanel(panelId, element) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            
-            document.getElementById('panel-' + panelId).classList.add('active');
-            element.classList.add('active');
-            
-            document.getElementById('pageTitle').textContent = element.textContent;
-        }
-        
-        function saveSettings(message) {
-            const alertBox = document.getElementById('settingsAlert');
-            alertBox.textContent = message;
-            alertBox.className = 'alert success';
-            setTimeout(() => {
-                alertBox.className = 'alert';
-                alertBox.style.display = 'none';
-            }, 3000);
-        }
-    </script>
+// ── DONATIONS LIST ───────────────────────────
+async function loadDonations() {
+  const { data } = await db.from('donations').select('*').order('created_at', { ascending: false }).limit(50);
+  const tbody = document.getElementById('donations-tbody');
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--tx-s);padding:20px">No donations recorded yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td style="font-family:monospace;font-size:11px">${d.receipt_no || '—'}</td>
+      <td>${d.donor_name || '—'}</td>
+      <td>${d.mobile || '—'}</td>
+      <td style="font-weight:600;color:var(--cr-d)">₹${parseFloat(d.amount || 0).toLocaleString('en-IN')}</td>
+      <td>${d.purpose || '—'}</td>
+      <td>${d.payment_mode || 'UPI'}</td>
+      <td><span class="status-badge status-${d.status || 'pending'}">${d.status || 'pending'}</span></td>
+      <td style="color:var(--tx-s);font-size:12px">${new Date(d.created_at).toLocaleDateString('en-IN')}</td>
+    </tr>
+  `).join('');
+}
 
-    <!-- ... all your admin HTML content ... -->
+// ── MESSAGES ─────────────────────────────────
+async function loadMessages() {
+  const { data } = await db.from('messages').select('*').order('created_at', { ascending: false }).limit(50);
+  const list = document.getElementById('messages-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--tx-s)">No messages received yet.</div>';
+    return;
+  }
+  list.innerHTML = data.map(m => `
+    <div style="border:1px solid var(--bd);border-radius:5px;padding:14px;margin-bottom:10px;background:${m.is_read ? 'var(--wh)' : 'rgba(201,151,42,.05)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:600;font-size:14px">${m.name || 'Unknown'} ${!m.is_read ? '<span class="status-badge status-unread" style="margin-left:6px">New</span>' : ''}</div>
+        <div style="font-size:11px;color:var(--tx-s)">${new Date(m.created_at).toLocaleDateString('en-IN')}</div>
+      </div>
+      <div style="font-size:12px;color:var(--tx-s);margin-bottom:8px">${m.email || ''} · ${m.mobile || ''} · <strong>${m.subject || ''}</strong></div>
+      <div style="font-size:13px;color:var(--tx-m)">${m.message || ''}</div>
+      ${!m.is_read ? `<button class="btn-secondary" style="margin-top:8px;padding:5px 12px;font-size:11px" onclick="markRead('${m.id}', this)">Mark as Read</button>` : ''}
+    </div>
+  `).join('');
+}
 
-    <!-- ✅ ADD THIS BLOCK before </body> in admin/index.html -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-      const { createClient } = supabase;
-      const db = createClient(
-        'https://vptidapvhejtviljegcm.supabase.co',      // 👈 same Project URL
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdGlkYXB2aGVqdHZpbGplZ2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzk1ODksImV4cCI6MjA5MDk1NTU4OX0.deTzO4Ys1LCCMRtGRwL3WZTz-3JxKukdpcWuV4CjVKk'          '          // 👈 same anon key
-      );
+async function markRead(id, btn) {
+  await db.from('messages').update({ is_read: true }).eq('id', id);
+  btn.parentElement.querySelector('[style*="New"]')?.remove();
+  btn.remove();
+  loadOverviewStats();
+  showToast('Marked as read');
+}
 
-      // ── AUTH ──────────────────────────────────────────
-      async function adminLogin(email, password) {
-        const { data, error } = await db.auth.signInWithPassword({
-          email, password
-        });
-        if (error) {
-          alert('Login failed: ' + error.message);
-          return false;
-        }
-        showDashboard();
-        loadAdminSettings();
-        return true;
-      }
+// ── RECEIPT PREVIEW ──────────────────────────
+function updateReceiptPreview() {
+  const trustName = document.getElementById('setting-trust_name')?.value || 'Shri Harsidhdhi Mataji Temple Trust';
+  const gstNo     = document.getElementById('setting-gst_number')?.value;
+  const footer    = document.getElementById('setting-receipt_footer')?.value;
+  const cert80g   = document.getElementById('setting-80g_number')?.value;
+  document.getElementById('rp-trust').textContent  = trustName;
+  document.getElementById('rp-footer').textContent = footer || 'Jai Harsidhdhi Mataji!';
+  document.getElementById('rp-80g').textContent    = cert80g ? '80G Cert: ' + cert80g : '';
+  const gstRow = document.getElementById('rp-gst');
+  if (gstNo) { gstRow.style.display = 'flex'; document.getElementById('rp-gst-no').textContent = gstNo; }
+  else gstRow.style.display = 'none';
+}
 
-      async function adminLogout() {
-        await db.auth.signOut();
-        showLoginForm();
-      }
+// ── CHANGE PASSWORD ───────────────────────────
+async function changePassword() {
+  const np = document.getElementById('new-password').value;
+  const cp = document.getElementById('confirm-password').value;
+  if (np.length < 12) { showToast('Password must be at least 12 characters', true); return; }
+  if (np !== cp) { showToast('Passwords do not match', true); return; }
+  const { error } = await db.auth.updateUser({ password: np });
+  if (error) showToast('Failed: ' + error.message, true);
+  else {
+    showToast('Password changed! Please log in again.');
+    setTimeout(() => { db.auth.signOut(); showLoginForm(); }, 2500);
+  }
+}
 
-      // Check if already logged in when admin page opens
-      window.addEventListener('load', async () => {
-        const { data: { session } } = await db.auth.getSession();
-        if (session) {
-          showDashboard();
-          loadAdminSettings();
-        } else {
-          showLoginForm();
-        }
-      });
+// ── SESSION INFO ─────────────────────────────
+async function loadSessionInfo() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return;
+  const el = document.getElementById('session-info');
+  el.innerHTML = `
+    Email: <strong>${session.user.email}</strong><br>
+    User ID: <code style="font-size:11px">${session.user.id}</code><br>
+    Last login: <strong>${new Date(session.user.last_sign_in_at).toLocaleString('en-IN')}</strong><br>
+    Session expires: <strong>${new Date(session.expires_at * 1000).toLocaleString('en-IN')}</strong>
+  `;
+}
 
-      // ── READ SETTINGS ─────────────────────────────────
-      async function loadAdminSettings() {
-        const { data } = await db.from('settings').select('id, value');
-        if (!data) return;
-        data.forEach(row => {
-          const el = document.getElementById('setting-' + row.id);
-          if (el) el.value = row.value;
-        });
-      }
+// ── RAZORPAY TEST ────────────────────────────
+async function testRazorpay() {
+  const key = document.getElementById('setting-rzp_key').value;
+  const result = document.getElementById('rzp-test-result');
+  if (!key || !key.startsWith('rzp_')) {
+    result.innerHTML = '<span style="color:red">❌ Invalid key format. Key must start with rzp_live_ or rzp_test_</span>';
+    return;
+  }
+  result.innerHTML = '<span style="color:green">✅ Key format is valid. For full test, make a ₹1 test payment using rzp_test_ key.</span>';
+}
 
-      // ── WRITE A SETTING ───────────────────────────────
-      async function saveSetting(key) {
-        const el = document.getElementById('setting-' + key);
-        if (!el) return;
-        const { error } = await db.from('settings')
-          .update({ value: el.value, updated_at: new Date() })
-          .eq('id', key);
-        if (error) alert('Save failed: ' + error.message);
-        else showToast('Saved!');
-      }
+// ── CONNECTION TESTS ─────────────────────────
+const out = () => document.getElementById('test-output');
+function log(msg) { out().textContent += '\n' + msg; }
 
-      // ── UPLOAD FILE (QR code / photo) ─────────────────
-      async function uploadFile(file, bucket, path) {
-        const { data, error } = await db.storage
-          .from(bucket)
-          .upload(path, file, { upsert: true });
-        if (error) { alert('Upload failed: ' + error.message); return null; }
-        const { data: url } = db.storage
-          .from(bucket).getPublicUrl(path);
-        return url.publicUrl;
-      }
+async function testRead() {
+  out().textContent = '⏳ Testing database read...';
+  const { data, error } = await db.from('settings').select('*');
+  if (error) log('❌ READ FAILED: ' + error.message);
+  else log('✅ READ SUCCESS — Found ' + data.length + ' settings rows\n' + JSON.stringify(data.slice(0,3), null, 2));
+}
 
-      // ── READ DONATIONS ────────────────────────────────
-      async function loadDonations() {
-        const { data } = await db.from('donations')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        return data || [];
-      }
+async function testWrite() {
+  out().textContent = '⏳ Testing database write...';
+  const { error } = await db.from('settings')
+    .update({ value: 'TEST-' + Date.now(), updated_at: new Date() })
+    .eq('id', 'stream_url');
+  if (error) log('❌ WRITE FAILED: ' + error.message + '\n(Check: are you logged in? Is RLS policy set correctly?)');
+  else log('✅ WRITE SUCCESS — Updated stream_url row\n(Please restore the correct value in Live Darshan settings)');
+}
 
-      // ── READ MESSAGES ─────────────────────────────────
-      async function loadMessages() {
-        const { data } = await db.from('messages')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        return data || [];
-      }
+async function testAuth() {
+  out().textContent = '⏳ Testing authentication...';
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) log('❌ AUTH: No active session found. Please log in first.');
+  else log('✅ AUTH SUCCESS\nLogged in as: ' + session.user.email + '\nUser ID: ' + session.user.id);
+}
 
-      // ── MARK MESSAGE AS READ ──────────────────────────
-      async function markRead(id) {
-        await db.from('messages')
-          .update({ is_read: true })
-          .eq('id', id);
-      }
-
-      function showToast(msg) {
-        const t = document.createElement('div');
-        t.textContent = '✅ ' + msg;
-        t.style.cssText = 'position:fixed;bottom:60px;right:20px;background:#166534;color:#fff;padding:10px 20px;border-radius:6px;font-family:sans-serif;font-size:14px;z-index:9999';
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 2500);
-      }
-    </script>
-
-  </body>
-</html>
-
-    
+async function testStorage() {
+  out().textContent = '⏳ Testing storage bucket...';
+  const { data, error } = await db.storage.from('temple-media').list('', { limit: 5 });
+  if (error) log('❌ STORAGE FAILED: ' + error.message + '\n(Check: is the temple-media bucket created in Supabase Storage?)');
+  else log('✅ STORAGE SUCCESS\nFiles in bucket: ' + data.length + '\n' + data.map(f => f.name).join('\n'));
+}
+</script>
 </body>
 </html>
